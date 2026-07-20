@@ -2,14 +2,9 @@
 #include "utils.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_init.h>
-#include <SDL3/SDL_oldnames.h>
-#include <SDL3/SDL_pixels.h>
 #include <SDL3/SDL_stdinc.h>
-#include <SDL3/SDL_surface.h>
-#include <SDL3/SDL_time.h>
 #include <SDL3/SDL_timer.h>
 #include <SDL3/SDL_video.h>
-#include <SDL3_ttf/SDL_ttf.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,15 +17,7 @@ typedef struct
   bool is_running;
 } _app_;
 
-/*! \enum SHADER_TYPE
- *
- *  The different kind of shader.
- */
-enum SHADER_TYPE
-{
-  VERTEX_SHADER,
-  FRAGMENT_SHADER
-};
+GLuint create_shader(GLenum shader_type, const GLchar *const* string);
 
 void error_shader( unsigned int shader )
 {
@@ -57,7 +44,7 @@ const char *fragment_shader_grogram = ""
                                       "   frag_colour = vec4( 0.5, 0.0, 0.5, 1.0 );"
                                       "}";
 
-// our triangle points.
+// our triangle vertex points.
 float points[] = {
   0.0f,  0.5f,  0.0f, // xyz of the first point.
   0.5f,  -0.5f, 0.0f, // xyz of the second point.
@@ -130,12 +117,9 @@ int main( int argc, char *argv[] )
   glBindBuffer( GL_ARRAY_BUFFER, vbo_buffer );
   glVertexAttribPointer( 0, 3, GL_FLOAT, GL_FALSE, 0, NULL );
 
-  unsigned int vsp = glCreateShader( GL_VERTEX_SHADER );
-  glShaderSource( vsp, 1, &vertex_shader_program, NULL );
-  glCompileShader( vsp );
-
+  GLuint vsp = create_shader(GL_VERTEX_SHADER, &vertex_shader_program);
   int params = -1;
-  glGetShaderiv( vsp, GL_COMPILE_STATUS, &params ); // check for compilation erros.
+  glGetShaderiv( vsp, GL_COMPILE_STATUS, &params ); // check for compilation errors.
   if ( GL_TRUE != params )
   {
     error_shader( vsp );
@@ -144,10 +128,8 @@ int main( int argc, char *argv[] )
     return EXIT_FAILURE;
   }
 
-  unsigned int fsp = glCreateShader( GL_FRAGMENT_SHADER );
-  glShaderSource( fsp, 1, &fragment_shader_grogram, NULL );
-  glCompileShader( fsp );
-  glGetShaderiv( fsp, GL_COMPILE_STATUS, &params ); // check for compilation erros.
+  GLuint fsp = create_shader(GL_FRAGMENT_SHADER, &fragment_shader_grogram);
+  glGetShaderiv( fsp, GL_COMPILE_STATUS, &params ); // check for compilation errors.
   if ( GL_TRUE != params )
   {
     error_shader( fsp );
@@ -235,4 +217,12 @@ int main( int argc, char *argv[] )
   SDL_DestroyWindow( application.window );
   SDL_Quit();
   return EXIT_SUCCESS;
+}
+
+GLuint create_shader(GLenum shader_type, const GLchar *const* string) {
+  unsigned int sp = glCreateShader(shader_type);
+  glShaderSource( sp, 1, string, NULL );
+  glCompileShader( sp );
+
+  return sp;
 }

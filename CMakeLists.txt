@@ -11,7 +11,7 @@ find_package(OpenGL REQUIRED)
 if (CMAKE_HOST_WIN32)
     # TODO: change this to be dynamic.
     list(APPEND CMAKE_PREFIX_PATH "C:/softwares/SDL3/")
-    # TODO: also linked sdl ttf on windows.
+    list(APPEND CMAKE_PREFIX_PATH "C:/softwares/SDL3_ttf-3.2.2")
 endif ()
 find_package(SDL3 REQUIRED)
 find_package(SDL3_ttf REQUIRED)
