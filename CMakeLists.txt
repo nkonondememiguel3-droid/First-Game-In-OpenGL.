@@ -21,6 +21,8 @@ add_subdirectory(externals)
 add_executable(first_opengl_game main.c
         src/utils.c
         src/include/utils.h
+        src/include/load.h
+        src/load.c
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenGL::GL SDL3::SDL3 SDL3_ttf::SDL3_ttf glad)

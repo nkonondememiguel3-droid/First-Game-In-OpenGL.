@@ -1,5 +1,6 @@
 #include "glad/gl.h"
 #include "utils.h"
+#include "load.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_stdinc.h>
@@ -8,7 +9,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 typedef struct
 {
@@ -16,25 +16,6 @@ typedef struct
 
   bool is_running;
 } _app_;
-
-GLuint create_shader(GLenum shader_type, const GLchar *const* string);
-
-void error_shader( unsigned int shader )
-{
-  int max_length = 2048, actual_length = 0;
-  char xlog[2058];
-  glGetShaderInfoLog( shader, max_length, &actual_length, xlog );
-  fprintf( stderr, "ERROR: Could not be link shader program GL index %u.\n%s\n", shader, xlog );
-  error( "ERROR: Shader index %u did not compile.\n%s\n", shader, xlog );
-}
-
-// where our vertex pixels should be place on the screen.
-const char *vertex_shader_program = ""
-                                    "#version 410 core\n"
-                                    "in vec3 vp;"
-                                    "void main() {"
-                                    "   gl_Position = vec4( vp, 1.0 );"
-                                    "}";
 
 // the color used by our pixel-framed vertex.
 const char *fragment_shader_grogram = ""
@@ -57,6 +38,16 @@ int main( int argc, char *argv[] )
   int window_width = 800, window_height = 640;
   bool full_screen = false;
   float title_countdown_s = 0.1f;
+  const char *vertex_shader_program = load_shader("../shaders/vertex_shader_program.vert");
+  if (vertex_shader_program == NULL) {
+    error("Failed to load the %s vertex shader mini-program.", "../shaders/vertex_shader_program.vert");
+    return EXIT_FAILURE;
+  }
+  //const char *fragment_shader_grogram = load_shader("../shaders/fragment_shader_program.frag");
+  //if (fragment_shader_grogram == NULL) {
+  //  error("Failed to load the %s vertex shader mini-program.", "../shaders/fragment_shader_program.frag");
+  //  return EXIT_FAILURE;
+  //}
 
   if ( !SDL_Init( SDL_INIT_VIDEO ) )
   {
@@ -100,7 +91,14 @@ int main( int argc, char *argv[] )
     return EXIT_FAILURE;
   }
 
-  if ( !gladLoadGL( (GLADloadfunc)SDL_GL_GetProcAddress ) ) { error( "Failed to initialize GLAD. ERROR: %s\n", glGetError() ); }
+  if (!gladLoadGL((GLADloadfunc)SDL_GL_GetProcAddress))
+  {
+    error("Failed to initialize GLAD.");
+    SDL_GL_DestroyContext(gl_current_context);
+    SDL_DestroyWindow(application.window);
+    SDL_Quit();
+    return EXIT_FAILURE;
+  }
 
   printf( "Renderer: %s\n", (char *)glGetString( GL_RENDERER ) );
   printf( "OpenGL version supported: %s\n", (char *)glGetString( GL_VERSION ) );
@@ -154,11 +152,22 @@ int main( int argc, char *argv[] )
   glDeleteShader( vsp );
   glDeleteShader( fsp );
 
+  // update the uniform value in the vertex shader
+  int time_location = glGetUniformLocation(shader_program, "time");
+  if ( time_location == -1 ) {
+    error("Can't find 'time' in the vertex shader mini-program.");
+    SDL_GL_DestroyContext(gl_current_context);
+    SDL_DestroyWindow(application.window);
+    glDeleteShader( vsp );
+    glDeleteShader( fsp );
+    return EXIT_FAILURE;
+  }
+
   float prev_s = SDL_GetTicks();
   while ( application.is_running )
   {
     float curr_s = SDL_GetTicks();
-    float elapsed_s = curr_s - prev_s;
+    float elapsed_s = (curr_s - prev_s) / 1000.0f;
     prev_s = curr_s; // updates the previous time to be the current time.
 
     // handle events.
@@ -173,6 +182,7 @@ int main( int argc, char *argv[] )
       case SDL_EVENT_KEY_DOWN:
         if ( event.key.key == SDLK_ESCAPE ) application.is_running = false;
         else if ( event.key.key == SDLK_F ) { full_screen = !full_screen; }
+    SDL_SetWindowFullscreen( application.window, full_screen );
         break;
       default:
         break;
@@ -180,7 +190,6 @@ int main( int argc, char *argv[] )
     }
 
     // handle updates.
-    SDL_SetWindowFullscreen( application.window, full_screen );
     SDL_GetWindowSize( application.window, &window_width, &window_height );
     glViewport( 0, 0, window_width, window_height );
 
@@ -196,13 +205,14 @@ int main( int argc, char *argv[] )
       title_countdown_s = 0.1f;
     }
 
+    float time = SDL_GetTicks() * 0.001f;
+
     // handle drawing.
     glClearColor( 0.6f, 0.6f, 0.8f, 1.0f );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-    glClearColor( 0.4f, 0.3f, 0.2, 1.0f );
-
     glUseProgram( shader_program );
+    glProgramUniform1f(shader_program, time_location, (float) time);
     glBindVertexArray( vao_buffer );
 
     glDrawArrays( GL_TRIANGLES, 0, 3 );
@@ -212,6 +222,7 @@ int main( int argc, char *argv[] )
 
   glDeleteBuffers( 1, &vbo_buffer );
   glDeleteVertexArrays( 1, &vao_buffer );
+  glDeleteProgram(shader_program);
 
   SDL_GL_DestroyContext( gl_current_context );
   SDL_DestroyWindow( application.window );
@@ -219,10 +230,3 @@ int main( int argc, char *argv[] )
   return EXIT_SUCCESS;
 }
 
-GLuint create_shader(GLenum shader_type, const GLchar *const* string) {
-  unsigned int sp = glCreateShader(shader_type);
-  glShaderSource( sp, 1, string, NULL );
-  glCompileShader( sp );
-
-  return sp;
-}
