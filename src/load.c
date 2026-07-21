@@ -27,10 +27,6 @@ const char *load_shader(const char *file_path) {
     }
 
     size_t read_size = fread(buffer, 1, file_size, fp);
-    //if (read_size != file_size) {
-    //    fprintf(stderr, "The file size[%llu] differs from the read size[%llu].\n", file_size, read_size);
-    //    return NULL;
-    //}
     printf("Read size: %llu\n", read_size);
 
     return buffer;
