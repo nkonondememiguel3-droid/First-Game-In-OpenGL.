@@ -8,9 +8,12 @@ in vec3 vertex_position;
 // this time variable will come from our C program.
 uniform float time;
 
+// here this out keyword tells GLSL that this variable is going to be send to the next shader stage in the pipeline.
+out vec3 position;
+
 void main()
 {
-    vec3 position = vertex_position;
+    position = vertex_position;
     position.y += sin( time );
 
     gl_Position = vec4( position, 1.0 ); // we position our vertecises int the clip era.

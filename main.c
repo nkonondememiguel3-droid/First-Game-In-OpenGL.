@@ -17,14 +17,6 @@ typedef struct
   bool is_running;
 } _app_;
 
-// the color used by our pixel-framed vertex.
-const char *fragment_shader_grogram = ""
-                                      "#version 410 core\n"
-                                      "out vec4 frag_colour;"
-                                      "void main() {"
-                                      "   frag_colour = vec4( 0.5, 0.0, 0.5, 1.0 );"
-                                      "}";
-
 // our triangle vertex points.
 float points[] = {
   0.0f,  0.5f,  0.0f, // xyz of the first point.
@@ -45,12 +37,12 @@ int main( int argc, char *argv[] )
     return EXIT_FAILURE;
   }
 
-  /* const char *fragment_shader_grogram = load_shader( "../shaders/fragment_shader_program.frag" ); */
-  /* if ( fragment_shader_grogram == NULL ) */
-  /* { */
-  /*   error( "Failed to load the %s vertex shader mini-program.", "../shaders/fragment_shader_program.frag" ); */
-  /*   return EXIT_FAILURE; */
-  /* } */
+  const char *fragment_shader_grogram = load_shader( "../shaders/fragment_shader_program.frag" );
+  if ( fragment_shader_grogram == NULL )
+  {
+    error( "Failed to load the %s vertex shader mini-program.", "../shaders/fragment_shader_program.frag" );
+    return EXIT_FAILURE;
+  }
 
   if ( !SDL_Init( SDL_INIT_VIDEO ) )
   {
@@ -133,7 +125,7 @@ int main( int argc, char *argv[] )
   glGetShaderiv( fsp, GL_COMPILE_STATUS, &params ); // check for compilation errors.
   if ( GL_TRUE != params )
   {
-    printf("this is the error\n");
+    printf( "this is the error\n" );
     error_shader( fsp );
     SDL_GL_DestroyContext( gl_current_context );
     SDL_DestroyWindow( application.window );

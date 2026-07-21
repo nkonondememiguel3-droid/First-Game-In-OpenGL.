@@ -29,5 +29,7 @@ const char *load_shader(const char *file_path) {
     size_t read_size = fread(buffer, 1, file_size, fp);
     printf("Read size: %llu\n", read_size);
 
+    fclose(fp);
+
     return buffer;
 }
