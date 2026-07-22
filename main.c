@@ -18,10 +18,13 @@ typedef struct
 } _app_;
 
 // our triangle vertex points.
+/* float points[] = { */
+/*   0.0f,  0.5f,  0.0f, // xyz of the first point. */
+/*   0.5f,  -0.5f, 0.0f, // xyz of the second point. */
+/*   -0.5f, -0.5f, 0.0f, // xyz of the third point. */
+/* }; */
 float points[] = {
-  0.0f,  0.5f,  0.0f, // xyz of the first point.
-  0.5f,  -0.5f, 0.0f, // xyz of the second point.
-  -0.5f, -0.5f, 0.0f, // xyz of the third point.
+  0.0f, 3.0f, 0.0f, 3.0f, -1.0f, 0.0f, -3.0f, -1.0f, 0.0f,
 };
 
 int main( int argc, char *argv[] )
@@ -30,14 +33,17 @@ int main( int argc, char *argv[] )
   int window_width = 800, window_height = 640;
   bool full_screen = false;
   float title_countdown_s = 0.1f;
-  const char *vertex_shader_program = load_shader( "../shaders/vertex_shader_program.vert" );
+
+  /* const char *vertex_shader_program = load_shader( "../shaders/vertex_shader_program.vert" ); */
+  const char *vertex_shader_program = load_shader( "../shaders/raymarcher.vert" );
   if ( vertex_shader_program == NULL )
   {
     error( "Failed to load the %s vertex shader mini-program.", "../shaders/vertex_shader_program.vert" );
     return EXIT_FAILURE;
   }
 
-  const char *fragment_shader_grogram = load_shader( "../shaders/fragment_shader_program.frag" );
+  /* const char *fragment_shader_grogram = load_shader( "../shaders/fragment_shader_program.frag" ); */
+  const char *fragment_shader_grogram = load_shader( "../shaders/raymarcher.frag" );
   if ( fragment_shader_grogram == NULL )
   {
     error( "Failed to load the %s vertex shader mini-program.", "../shaders/fragment_shader_program.frag" );
@@ -59,7 +65,7 @@ int main( int argc, char *argv[] )
   SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1 );
   SDL_GL_SetAttribute( SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG, true );
   SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_CORE, SDL_GL_CONTEXT_PROFILE_CORE );
-  SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 16 );
+  /* SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 16 ); */
 
   // create a window.
   application.window = SDL_CreateWindow( "hello, world", window_width, window_height, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE );
@@ -149,10 +155,14 @@ int main( int argc, char *argv[] )
   glDeleteShader( fsp );
 
   // update the uniform value in the vertex shader
-  int time_location = glGetUniformLocation( shader_program, "time" );
-  if ( time_location == -1 )
+  int res_location = glGetUniformLocation( shader_program, "iResolution" );
+  int time_location = glGetUniformLocation( shader_program, "iTime" );
+  /* int time_location = glGetUniformLocation( shader_program, "time" ); */
+  if ( time_location == -1 || res_location == -1 )
   {
-    error( "Can't find 'time' in the vertex shader mini-program." );
+    printf( "Attention: 'iTime' ou 'iResolution' introuvable dans le fragment shader.\n" );
+    /* error( "Can't find 'time' in the vertex shader mini-program." ); */
+    error( "Attention: 'iTime' ou 'iResolution' introuvable dans le fragment shader.\n" );
     SDL_GL_DestroyContext( gl_current_context );
     SDL_DestroyWindow( application.window );
     glDeleteShader( vsp );
@@ -188,7 +198,8 @@ int main( int argc, char *argv[] )
 
     // handle updates.
     SDL_GetWindowSize( application.window, &window_width, &window_height );
-    glViewport( 0, 0, window_width, window_height );
+    int render_scale = 2;
+    glViewport( 0, 0, window_width / render_scale, window_height / render_scale );
 
     title_countdown_s -= elapsed_s;
     if ( title_countdown_s <= 0.0 && elapsed_s > 0.0f )
@@ -202,14 +213,16 @@ int main( int argc, char *argv[] )
       title_countdown_s = 0.1f;
     }
 
-    float time = SDL_GetTicks() * 0.001f;
-
     // handle drawing.
     glClearColor( 0.6f, 0.6f, 0.8f, 1.0f );
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glUseProgram( shader_program );
+    glProgramUniform3f( shader_program, res_location, (float)window_width, (float)window_height, 0.0f );
+
+    float time = SDL_GetTicks() * 0.001f;
     glProgramUniform1f( shader_program, time_location, (float)time );
+
     glBindVertexArray( vao_buffer );
 
     glDrawArrays( GL_TRIANGLES, 0, 3 );

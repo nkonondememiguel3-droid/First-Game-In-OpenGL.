@@ -14,7 +14,11 @@ out vec3 position;
 void main()
 {
     position = vertex_position;
-    position.y += sin( time );
+    // position.y += sin( time );
 
-    gl_Position = vec4( position, 1.0 ); // we position our vertecises int the clip era.
+    position.x += sin( time + position.x * 5.0 ) * 0.2;
+    position.y += cos( time + position.y * 3.0 ) * 0.1;
+
+    float echel = 1.3;
+    gl_Position = vec4( position * echel, 1.0 ); // we position our vertecises int the clip era.
 }
