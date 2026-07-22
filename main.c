@@ -18,14 +18,14 @@ typedef struct
 } _app_;
 
 // our triangle vertex points.
-/* float points[] = { */
-/*   0.0f,  0.5f,  0.0f, // xyz of the first point. */
-/*   0.5f,  -0.5f, 0.0f, // xyz of the second point. */
-/*   -0.5f, -0.5f, 0.0f, // xyz of the third point. */
-/* }; */
 float points[] = {
-  0.0f, 3.0f, 0.0f, 3.0f, -1.0f, 0.0f, -3.0f, -1.0f, 0.0f,
+  0.0f,  0.5f,  0.0f, // xyz of the first point.
+  0.5f,  -0.5f, 0.0f, // xyz of the second point.
+  -0.5f, -0.5f, 0.0f, // xyz of the third point.
 };
+//float points[] = {
+//  0.0f, 3.0f, 0.0f, 3.0f, -1.0f, 0.0f, -3.0f, -1.0f, 0.0f,
+//};
 
 int main( int argc, char *argv[] )
 {
@@ -34,16 +34,16 @@ int main( int argc, char *argv[] )
   bool full_screen = false;
   float title_countdown_s = 0.1f;
 
-  /* const char *vertex_shader_program = load_shader( "../shaders/vertex_shader_program.vert" ); */
-  const char *vertex_shader_program = load_shader( "../shaders/raymarcher.vert" );
+  const char *vertex_shader_program = load_shader( "../shaders/vertex_shader_program.vert" );
+  //const char *vertex_shader_program = load_shader( "../shaders/raymarcher.vert" );
   if ( vertex_shader_program == NULL )
   {
     error( "Failed to load the %s vertex shader mini-program.", "../shaders/vertex_shader_program.vert" );
     return EXIT_FAILURE;
   }
 
-  /* const char *fragment_shader_grogram = load_shader( "../shaders/fragment_shader_program.frag" ); */
-  const char *fragment_shader_grogram = load_shader( "../shaders/raymarcher.frag" );
+  const char *fragment_shader_grogram = load_shader( "../shaders/fragment_shader_program.frag" );
+  //const char *fragment_shader_grogram = load_shader( "../shaders/raymarcher.frag" );
   if ( fragment_shader_grogram == NULL )
   {
     error( "Failed to load the %s vertex shader mini-program.", "../shaders/fragment_shader_program.frag" );
@@ -155,14 +155,15 @@ int main( int argc, char *argv[] )
   glDeleteShader( fsp );
 
   // update the uniform value in the vertex shader
-  int res_location = glGetUniformLocation( shader_program, "iResolution" );
-  int time_location = glGetUniformLocation( shader_program, "iTime" );
-  /* int time_location = glGetUniformLocation( shader_program, "time" ); */
-  if ( time_location == -1 || res_location == -1 )
+  //int res_location = glGetUniformLocation( shader_program, "iResolution" );
+  //int time_location = glGetUniformLocation( shader_program, "iTime" );
+  int time_location = glGetUniformLocation( shader_program, "time" );
+  //if ( time_location == -1 || res_location == -1 )
+  if ( time_location == -1 )
   {
-    printf( "Attention: 'iTime' ou 'iResolution' introuvable dans le fragment shader.\n" );
-    /* error( "Can't find 'time' in the vertex shader mini-program." ); */
-    error( "Attention: 'iTime' ou 'iResolution' introuvable dans le fragment shader.\n" );
+    //printf( "Attention: 'iTime' ou 'iResolution' introuvable dans le fragment shader.\n" );
+    error( "Can't find 'time' in the vertex shader mini-program." );
+    //error( "Attention: 'iTime' ou 'iResolution' introuvable dans le fragment shader.\n" );
     SDL_GL_DestroyContext( gl_current_context );
     SDL_DestroyWindow( application.window );
     glDeleteShader( vsp );
@@ -218,7 +219,7 @@ int main( int argc, char *argv[] )
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glUseProgram( shader_program );
-    glProgramUniform3f( shader_program, res_location, (float)window_width, (float)window_height, 0.0f );
+    //glProgramUniform3f( shader_program, res_location, (float)window_width, (float)window_height, 0.0f );
 
     float time = SDL_GetTicks() * 0.001f;
     glProgramUniform1f( shader_program, time_location, (float)time );
