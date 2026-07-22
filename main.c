@@ -199,7 +199,7 @@ int main( int argc, char *argv[] )
     // handle updates.
     SDL_GetWindowSize( application.window, &window_width, &window_height );
     int render_scale = 2;
-    glViewport( 0, 0, window_width / render_scale, window_height / render_scale );
+    glViewport( 0, 0, window_width, window_height );
 
     title_countdown_s -= elapsed_s;
     if ( title_countdown_s <= 0.0 && elapsed_s > 0.0f )
