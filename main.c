@@ -27,6 +27,13 @@ float points[] = {
 //  0.0f, 3.0f, 0.0f, 3.0f, -1.0f, 0.0f, -3.0f, -1.0f, 0.0f,
 //};
 
+// colour vertex buffer
+float colours[] = {
+  1.0f, 0.0f, 0.0f,
+  0.0f, 1.0f, 0.0f,
+  0.0f, 0.0f, 1.0f,
+};
+
 int main( int argc, char *argv[] )
 {
 
@@ -108,6 +115,11 @@ int main( int argc, char *argv[] )
   glGenBuffers( 1, &vbo_buffer );
   glBindBuffer( GL_ARRAY_BUFFER, vbo_buffer );
   glBufferData( GL_ARRAY_BUFFER, sizeof( points ) / sizeof( points[0] ) * sizeof( float ), points, GL_STATIC_DRAW );
+
+  GLuint colour_vbo = 0;
+  glGenBuffers(1, &colour_vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, colour_vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(colours) / sizeof( colours[0] ) * sizeof( float ), colours, GL_STATIC_DRAW);
 
   unsigned int vao_buffer = 0;
   glGenVertexArrays( 1, &vao_buffer );
@@ -215,7 +227,7 @@ int main( int argc, char *argv[] )
     }
 
     // handle drawing.
-    glClearColor( 0.6f, 0.6f, 0.8f, 1.0f );
+    /* glClearColor( 0.6f, 0.6f, 0.8f, 1.0f ); */
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
     glUseProgram( shader_program );
@@ -226,7 +238,7 @@ int main( int argc, char *argv[] )
 
     glBindVertexArray( vao_buffer );
 
-    glDrawArrays( GL_TRIANGLES, 0, 3 );
+    glDrawArrays( GL_LINE_LOOP, 0, 3 );
 
     SDL_GL_SwapWindow( application.window );
   }

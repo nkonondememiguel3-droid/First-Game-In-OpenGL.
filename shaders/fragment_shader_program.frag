@@ -19,17 +19,17 @@ void main()
 //
 //     frag_colour = vec4( r, g, b, 1.0 );
 
-//    float dist = length(position.xy);
-//    float pulse = sin(dist * 20.0 - time * 5.0) * 0.5 + 0.5;
-//    vec3 neon_color = vec3(0.0, 0.8, 1.0) / (dist * 2.0 + 0.1);
-//
-//    frag_colour = vec4(neon_color * pulse, 1.0);
+float dist = length(position.xy);
+float pulse = sin(dist * 20.0 - time * 5.0) * 0.5 + 0.5;
+vec3 neon_color = vec3(0.0, 0.8, 1.0) / (dist * 2.0 + 0.1);
 
-     float scanline = sin(position.y * 50.0 + time * 10.0);
-     float intensity = scanline > 0.0 ? 1.0 : 0.3;
-     vec3 amber = vec3(1.0, 0.7, 0.0) * intensity;
+frag_colour = vec4(neon_color * pulse, 1.0);
 
-     frag_colour = vec4(amber, 1.0);
+     // float scanline = sin(position.y * 50.0 + time * 10.0);
+     // float intensity = scanline > 0.0 ? 1.0 : 0.3;
+     // vec3 amber = vec3(1.0, 0.7, 0.0) * intensity;
+
+     // frag_colour = vec4(amber, 1.0);
 
     //frag_colour = vec4( position, 1.0 );
 }
